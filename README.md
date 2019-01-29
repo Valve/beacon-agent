@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Valve/event-tracker.svg?branch=master)](https://travis-ci.org/Valve/event-tracker)
+
 # Event-Tracker (WIP)
 
 Simple library that allows you to send events to your server. Useful to send analytics and diagnostics events.
