@@ -4,7 +4,7 @@
 
 Simple library that allows you to send events to your server. Useful to send analytics and diagnostics events.
 
-Uses (Beacon API)[https://developer.mozilla.org/en-US/docs/Web/API/Beacon_API] if it's available 
+Uses [Beacon API](https://developer.mozilla.org/en-US/docs/Web/API/Beacon_API) if it's available 
 and an image node if it's not.
 
 ## Usage
