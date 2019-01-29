@@ -2,7 +2,8 @@
 
 Simple library that allows you to send events to your server. Useful to send analytics and diagnostics events.
 
-Uses Beacon API if it's available and a proven 1x1 pixel if it's not.
+Uses (Beacon API)[https://developer.mozilla.org/en-US/docs/Web/API/Beacon_API] if it's available 
+and an image node if it's not.
 
 ## Usage
 
@@ -16,7 +17,7 @@ tracker.track(eventType: 'event', eventCategory: 'ad', eventAction: 'click',
 Track returns a promise so you can chain it with other async methods:
 
 ```js
-tracker.track(...).then(console.log("send analytics event successfully"));
+tracker.track(...).then(console.log("sent analytics event successfully"));
 ```
 
 You can also specify a timeout after which the promise will be rejected.

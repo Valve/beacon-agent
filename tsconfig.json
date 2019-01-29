@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "es5",
     "sourceMap": true,
-    "module": "es6",
-    "outDir": "build",
+    "module":"none",
+    "outDir": "dist",
     "lib": ["es2015", "dom"]
   }
 } 

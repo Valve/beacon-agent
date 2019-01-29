@@ -1,0 +1,18 @@
+{
+  "name": "event-tracker",
+  "version": "0.1.0",
+  "description": "Simple library that allows you to send events to your server. Useful to send analytics and diagnostics events.",
+  "main": "index.js",
+  "repository": "git@github.com:Valve/event-tracker.git",
+  "author": "Valentin Vasilyev <valentin.vasilyev@outlook.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "test": "karma start --single-run --browsers ChromeHeadless karma.conf.js"
+  },
+  "devDependencies": {
+    "karma": "^4.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-jasmine": "^2.0.1"
+  }
+}

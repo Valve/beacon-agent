@@ -1,7 +1,7 @@
-export class Tracker {
-  private readonly url: string
-  private readonly timeout: number
-  private readonly queryParams = {
+class Tracker {
+  public readonly url: string
+  public readonly timeout: number
+  public readonly queryParams = {
     eventType: 'et',
     eventCategory: 'ec',
     eventAction: 'ea',
@@ -9,11 +9,14 @@ export class Tracker {
   }
 
   constructor(url: string, timeout: 5000) {
+    if(!url) {
+      throw "url argument is required";
+    }
     this.url = url
     this.timeout = timeout
   }
 
-  public track(eventType: string, eventCategory: string, eventAction: string, eventData = {})
+  public send(eventType: string, eventCategory: string, eventAction: string, eventData = {})
     : Promise<{}> {
     let promise = new Promise((resolve, reject) => {
       setTimeout(() => { reject("timeout") }, this.timeout)
