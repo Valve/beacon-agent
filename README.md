@@ -4,15 +4,15 @@
 
 Simple library that allows you to send events to your server. Useful to send analytics and diagnostics events.
 
-Uses [Beacon API](https://developer.mozilla.org/en-US/docs/Web/API/Beacon_API) if it's available 
-and an image node if it's not.
+Uses [Beacon API](https://developer.mozilla.org/en-US/docs/Web/API/Beacon_API) if it"s available 
+and an image node if it"s not.
 
 ## Usage
 
 ```js
-var tracker = new Tracker('/endpoint');
-tracker.track(eventType: 'event', eventCategory: 'ad', eventAction: 'click', 
-  eventData: {adID: '233925', adPosition: 'top-left'}
+var tracker = new Tracker("https://tracking.example.com");
+tracker.track(eventType: "event", eventCategory: "ad", eventAction: "click", 
+  eventData: {adID: "233925", adPosition: "top-left"}
 );
 ```
 
@@ -27,7 +27,7 @@ This is done to not keep open connections to busy servers forever.
 
 ```js
 // reject after 5 seconds
-var tracker = new Tracker('/endpoing', 5000); 
+var tracker = new Tracker("https://tracking.example.com", 5000); 
 tracker.track(...);
 ```
 
@@ -40,11 +40,11 @@ eventAction: ea
 eventData: ed
 ```
 
-It's possible to override these by specifying a new object:
+It"s possible to override these by specifying a new object:
 
 ```js
 Tracker.queryParams = {
-  eventType: '___et___',
+  eventType: "___et___",
   ...
 }
 ```
