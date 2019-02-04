@@ -19,11 +19,11 @@ var Tracker = /** @class */ (function () {
         var promise = new Promise(function (resolve, reject) {
             setTimeout(function () { reject("timeout"); }, _this.timeout);
             if (_this.isBeaconSupported()) {
-                var enqueued = _this.trackWithBeacon(visitorId, eventType, eventData);
+                var enqueued = _this.sendWithBeacon(visitorId, eventType, eventData);
                 enqueued ? resolve() : reject("User agent failed to enqueue beacon");
             }
             else {
-                _this.trackWithPixel(visitorId, eventType, eventData)
+                _this.sendWithPixel(visitorId, eventType, eventData)
                     .catch(function (e) { return reject(e); })
                     .then(function () { return resolve(); });
             }
@@ -34,7 +34,7 @@ var Tracker = /** @class */ (function () {
     Tracker.prototype.isBeaconSupported = function () {
         return "sendBeacon" in navigator;
     };
-    Tracker.prototype.trackWithPixel = function (visitorId, eventType, eventData) {
+    Tracker.prototype.sendWithPixel = function (visitorId, eventType, eventData) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
             var img = new Image(1, 1);
@@ -45,15 +45,15 @@ var Tracker = /** @class */ (function () {
         });
         return promise;
     };
-    Tracker.prototype.trackWithBeacon = function (visitorId, eventType, eventData) {
+    Tracker.prototype.sendWithBeacon = function (visitorId, eventType, eventData) {
         var payload = this.buildBeaconPayload(visitorId, eventType, eventData);
-        return navigator.sendBeacon(this.url, payload);
+        return navigator.sendBeacon(this.url, JSON.stringify(payload));
     };
     Tracker.prototype.buildBeaconPayload = function (visitorId, eventType, eventData) {
-        var payload = new FormData();
-        payload.set(this.queryParams.visitorId, visitorId);
-        payload.set(this.queryParams.eventType, eventType);
-        payload.set(this.queryParams.eventData, this.valueToQueryString(eventData));
+        var payload = {};
+        payload[this.queryParams.visitorId] = visitorId;
+        payload[this.queryParams.eventType] = eventType;
+        payload[this.queryParams.eventData] = this.acronymizeObject(eventData);
         return payload;
     };
     Tracker.prototype.buildPixelQueryString = function (visitorId, eventType, eventData) {
@@ -63,16 +63,27 @@ var Tracker = /** @class */ (function () {
         params[this.queryParams.eventData] = this.valueToQueryString(eventData);
         return this.valueToQueryString(params);
     };
+    Tracker.prototype.acronymizeObject = function (obj) {
+        var _this = this;
+        var newObj = {};
+        Object.keys(obj).forEach(function (key) {
+            newObj[_this.maybeShortenKey(key)] = obj[key];
+        });
+        return newObj;
+    };
     Tracker.prototype.valueToQueryString = function (value) {
         var _this = this;
-        if (typeof value === "string") {
+        var encodeShortenedKey = function (key) { return encodeURIComponent(_this.maybeShortenKey(key)); };
+        var createKeyValuePair = function (key) { return encodeShortenedKey(key) + "=" + _this.valueToQueryString(value[key]); };
+        if (typeof value === "object") {
+            return Object.keys(value).map(function (key) { return createKeyValuePair(key); }).join("&");
+        }
+        else {
             return encodeURIComponent(value);
         }
-        else if (typeof value === "object") {
-            return Object.keys(value).map(function (k) {
-                encodeURIComponent(k) + "=" + _this.valueToQueryString(value[k]);
-            }).join("&");
-        }
+    };
+    Tracker.prototype.maybeShortenKey = function (key) {
+        return this.queryParams[key] || key;
     };
     return Tracker;
 }());
