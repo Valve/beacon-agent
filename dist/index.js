@@ -1,31 +1,31 @@
 var Tracker = /** @class */ (function () {
-    function Tracker(url, timeout) {
+    function Tracker(endpointUrl, timeout) {
         this.queryParams = {
             visitorId: "vid",
             eventType: "et",
             eventCategory: "ec",
             eventAction: "ea",
-            eventData: "ed"
+            eventData: "ed",
+            referrer: "r",
+            url: "url"
         };
-        if (!url) {
-            throw "url argument is required";
+        if (!endpointUrl) {
+            throw "endpointUrl argument is required";
         }
-        this.url = url;
+        this.endpointUrl = endpointUrl;
         this.timeout = timeout;
     }
-    Tracker.prototype.send = function (visitorId, eventType, eventData) {
+    Tracker.prototype.send = function (visitorId, eventData) {
         var _this = this;
         if (eventData === void 0) { eventData = {}; }
         var promise = new Promise(function (resolve, reject) {
             setTimeout(function () { reject("timeout"); }, _this.timeout);
             if (_this.isBeaconSupported()) {
-                var enqueued = _this.sendWithBeacon(visitorId, eventType, eventData);
-                enqueued ? resolve() : reject("User agent failed to enqueue beacon");
+                var enqueued = _this.sendWithBeacon(visitorId, eventData);
+                enqueued ? resolve() : reject("Failed to enqueue beacon");
             }
             else {
-                _this.sendWithPixel(visitorId, eventType, eventData)
-                    .catch(function (e) { return reject(e); })
-                    .then(function () { return resolve(); });
+                _this.sendWithPixel(visitorId, eventData).catch(function (e) { return reject(e); }).then(function () { return resolve(); });
             }
             resolve();
         });
@@ -34,32 +34,35 @@ var Tracker = /** @class */ (function () {
     Tracker.prototype.isBeaconSupported = function () {
         return "sendBeacon" in navigator;
     };
-    Tracker.prototype.sendWithPixel = function (visitorId, eventType, eventData) {
+    Tracker.prototype.sendWithPixel = function (visitorId, eventData) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
             var img = new Image(1, 1);
             img.onload = function (e) { return resolve(); };
             img.onerror = function (e) { return reject(e); };
-            var queryString = _this.buildPixelQueryString(visitorId, eventType, eventData);
+            var queryString = _this.buildPixelQueryString(visitorId, eventData);
             img.src = "?" + queryString;
         });
         return promise;
     };
-    Tracker.prototype.sendWithBeacon = function (visitorId, eventType, eventData) {
-        var payload = this.buildBeaconPayload(visitorId, eventType, eventData);
-        return navigator.sendBeacon(this.url, JSON.stringify(payload));
+    Tracker.prototype.sendWithBeacon = function (visitorId, eventData) {
+        var payload = this.buildBeaconPayload(visitorId, eventData);
+        return navigator.sendBeacon(this.endpointUrl, JSON.stringify(payload));
     };
-    Tracker.prototype.buildBeaconPayload = function (visitorId, eventType, eventData) {
+    Tracker.prototype.buildBeaconPayload = function (visitorId, eventData) {
         var payload = {};
         payload[this.queryParams.visitorId] = visitorId;
-        payload[this.queryParams.eventType] = eventType;
         payload[this.queryParams.eventData] = this.acronymizeObject(eventData);
+        // adding additional values
+        if (document.referrer !== "") {
+            payload[this.queryParams.eventData][this.queryParams.referrer] = document.referrer;
+        }
+        payload[this.queryParams.eventData][this.queryParams.url] = location.href;
         return payload;
     };
-    Tracker.prototype.buildPixelQueryString = function (visitorId, eventType, eventData) {
+    Tracker.prototype.buildPixelQueryString = function (visitorId, eventData) {
         var params = {};
         params[this.queryParams.visitorId] = visitorId;
-        params[this.queryParams.eventType] = eventType;
         params[this.queryParams.eventData] = this.valueToQueryString(eventData);
         return this.valueToQueryString(params);
     };
