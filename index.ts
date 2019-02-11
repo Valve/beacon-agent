@@ -1,4 +1,5 @@
 class Tracker {
+  private readonly VISITOR_KEY = "vid";
   public readonly endpointUrl: string
   public readonly timeout: number
   public readonly queryParams = {
@@ -11,7 +12,7 @@ class Tracker {
     url: "url"
   }
 
-  constructor(endpointUrl: string, timeout: 5000) {
+  constructor(endpointUrl: string, timeout = 5000) {
     if (!endpointUrl) {
       throw "endpointUrl argument is required"
     }
@@ -19,16 +20,28 @@ class Tracker {
     this.timeout = timeout
   }
 
-  public send(visitorId: string, eventData = {}): Promise<{}> {
+  public send(eventData: {}): Promise<{}> {
     let promise = new Promise((resolve, reject) => {
-      setTimeout(() => { reject("timeout") }, this.timeout)
-      if (this.isBeaconSupported()) {
-        let enqueued = this.sendWithBeacon(visitorId, eventData)
-        enqueued ? resolve() : reject("Failed to enqueue beacon")
-      } else {
-        this.sendWithPixel(visitorId, eventData).catch(e => reject(e)).then(() => resolve())
+      let timeout = setTimeout(() => { reject("timeout") }, this.timeout)
+      let clearTimeoutAndResolve = () => {
+        clearTimeout(timeout)
+        resolve()
       }
-      resolve()
+
+      if (this.isBeaconSupported()) {
+        try {
+          let sent = this.sendWithBeacon(eventData)
+          if(sent) {
+            clearTimeoutAndResolve()
+          } else {
+            reject("send failed")
+          }
+        } catch(e) {
+          reject(`send failed: ${e}`)
+        }
+      } else {
+        this.sendWithPixel(eventData).catch(e => reject(e)).then(() => resolve())
+      }
     })
     return promise
   }
@@ -37,25 +50,25 @@ class Tracker {
     return "sendBeacon" in navigator
   }
 
-  private sendWithPixel(visitorId: string, eventData: {}): Promise<{}> {
+  private sendWithPixel(eventData: {}): Promise<{}> {
     let promise = new Promise((resolve, reject) => {
       const img = new Image(1, 1)
       img.onload = (e) => resolve()
       img.onerror = (e) => reject(e)
-      let queryString = this.buildPixelQueryString(visitorId, eventData)
+      let queryString = this.buildPixelQueryString(eventData)
       img.src = "?" + queryString
     })
     return promise
   }
 
-  private sendWithBeacon(visitorId: string, eventData: {}): boolean {
-    const payload = this.buildBeaconPayload(visitorId, eventData)
+  private sendWithBeacon(eventData: {}): boolean {
+    const payload = this.buildBeaconPayload(eventData)
     return navigator.sendBeacon(this.endpointUrl, JSON.stringify(payload));
   }
 
-  private buildBeaconPayload(visitorId: string, eventData: {}): {} {
+  private buildBeaconPayload(eventData: {}): {} {
     const payload = {}
-    payload[this.queryParams.visitorId] = visitorId
+    payload[this.queryParams.visitorId] = this.getVisitorId() 
     payload[this.queryParams.eventData] = this.acronymizeObject(eventData)
     // adding additional values
     if(document.referrer !== "") {
@@ -65,9 +78,8 @@ class Tracker {
     return payload
   }
 
-  private buildPixelQueryString(visitorId: string, eventData: {}): string {
-    let params = {}
-    params[this.queryParams.visitorId] = visitorId
+  private buildPixelQueryString(eventData: {}): string {
+    const params = { visitorId: this.getVisitorId() }
     params[this.queryParams.eventData] = this.valueToQueryString(eventData)
     return this.valueToQueryString(params)
   }
@@ -93,5 +105,23 @@ class Tracker {
 
   private maybeShortenKey(key: string): string {
     return this.queryParams[key] || key;
+  }
+
+  private getVisitorId(): string {
+    let visitorId = localStorage.getItem(this.VISITOR_KEY)
+    if(!visitorId) {
+      visitorId = this.randomString(8)
+      localStorage.setItem(this.VISITOR_KEY, visitorId)
+    }
+    return visitorId
+  }
+
+  private randomString(length: number): string {
+    const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789"
+    let out = ""
+    for(let i = 0; i < length; i++) {
+      out += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return out
   }
 }

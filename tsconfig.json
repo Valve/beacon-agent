@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2018",
     "sourceMap": true,
-    "module":"none",
+    "module":"es2015",
     "outDir": "dist",
     "lib": ["es2015", "dom"]
   }
