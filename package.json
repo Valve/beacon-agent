@@ -1,6 +1,6 @@
 {
   "name": "beacon-agent",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Allows you to send events to your server. Useful to send analytics and diagnostics events.",
   "keywords": ["events", "tracking", "analytics", "telemetry", "diagnostics", "beacon", "pixel"],
   "main": "dist/index.js",
