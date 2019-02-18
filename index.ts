@@ -49,7 +49,7 @@ class BeaconAgent {
   }
 
   private isBeaconSupported(): boolean {
-    return false //return "sendBeacon" in navigator
+    return "sendBeacon" in navigator
   }
 
   private sendWithPixel(event: {}): Promise<{}> {
@@ -65,7 +65,7 @@ class BeaconAgent {
 
   private sendWithBeacon(event: {}): boolean {
     const payload = this.buildPayload(event)
-    return navigator.sendBeacon(this.endpointUrl, JSON.stringify(payload));
+    return navigator.sendBeacon(this.endpointUrl, JSON.stringify(payload))
   }
 
 
