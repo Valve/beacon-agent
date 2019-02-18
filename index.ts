@@ -1,5 +1,5 @@
-class Tracker {
-  private readonly VISITOR_KEY = "vid";
+export class Tracker {
+  private readonly VISITOR_KEY = "vid"
   public readonly endpointUrl: string
   public readonly timeout: number
   public readonly queryParams = {
@@ -7,7 +7,6 @@ class Tracker {
     eventType: "et",
     eventCategory: "ec",
     eventAction: "ea",
-    eventData: "ed",
     referrer: "r",
     url: "url"
   }
@@ -20,7 +19,7 @@ class Tracker {
     this.timeout = timeout
   }
 
-  public send(eventData: {}): Promise<{}> {
+  public send(event: {}): Promise<{}> {
     let promise = new Promise((resolve, reject) => {
       let timeout = setTimeout(() => { reject("timeout") }, this.timeout)
       let clearTimeoutAndResolve = () => {
@@ -30,7 +29,7 @@ class Tracker {
 
       if (this.isBeaconSupported()) {
         try {
-          let sent = this.sendWithBeacon(eventData)
+          let sent = this.sendWithBeacon(event)
           if(sent) {
             clearTimeoutAndResolve()
           } else {
@@ -40,48 +39,47 @@ class Tracker {
           reject(`send failed: ${e}`)
         }
       } else {
-        this.sendWithPixel(eventData).catch(e => reject(e)).then(() => resolve())
+        this.sendWithPixel(event).catch(e => reject(e)).then(() => resolve())
       }
     })
     return promise
   }
 
   private isBeaconSupported(): boolean {
-    return "sendBeacon" in navigator
+    return false //return "sendBeacon" in navigator
   }
 
-  private sendWithPixel(eventData: {}): Promise<{}> {
+  private sendWithPixel(event: {}): Promise<{}> {
     let promise = new Promise((resolve, reject) => {
       const img = new Image(1, 1)
       img.onload = (e) => resolve()
       img.onerror = (e) => reject(e)
-      let queryString = this.buildPixelQueryString(eventData)
-      img.src = "?" + queryString
+      let queryString = this.buildPixelQueryString(event)
+      img.src = `${this.endpointUrl}?${queryString}`
     })
     return promise
   }
 
-  private sendWithBeacon(eventData: {}): boolean {
-    const payload = this.buildBeaconPayload(eventData)
+  private sendWithBeacon(event: {}): boolean {
+    const payload = this.buildPayload(event)
     return navigator.sendBeacon(this.endpointUrl, JSON.stringify(payload));
   }
 
-  private buildBeaconPayload(eventData: {}): {} {
-    const payload = {}
-    payload[this.queryParams.visitorId] = this.getVisitorId() 
-    payload[this.queryParams.eventData] = this.acronymizeObject(eventData)
-    // adding additional values
-    if(document.referrer !== "") {
-      payload[this.queryParams.eventData][this.queryParams.referrer] = document.referrer
-    }
-    payload[this.queryParams.eventData][this.queryParams.url] = location.href
-    return payload
+
+  private buildPixelQueryString(event: {}): string {
+    const payload = this.buildPayload(event)
+    return this.valueToQueryString(payload)
   }
 
-  private buildPixelQueryString(eventData: {}): string {
-    const params = { visitorId: this.getVisitorId() }
-    params[this.queryParams.eventData] = this.valueToQueryString(eventData)
-    return this.valueToQueryString(params)
+  private buildPayload(event: {}): {} {
+    const payload = this.acronymizeObject(event)
+    payload[this.queryParams.visitorId] = this.getVisitorId() 
+    // adding additional values
+    if(document.referrer !== "") {
+      payload[this.queryParams.referrer] = document.referrer
+    }
+    payload[this.queryParams.url] = location.href
+    return payload
   }
 
   private acronymizeObject(obj: {}): {} {
