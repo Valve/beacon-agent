@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/Valve/event-tracker.svg?branch=master)](https://travis-ci.org/Valve/event-tracker)
+[![Build Status](https://travis-ci.org/Valve/event-tracker.svg?branch=master)](https://travis-ci.org/Valve/beacon-agent)
 
-# Event-Tracker (WIP)
+# Beacon Agent
 
 Simple library that allows you to send events to your server. Useful to send analytics and diagnostics events.
 
@@ -10,7 +10,7 @@ and an image node if it"s not.
 ## Usage
 
 ```js
-var tracker = new Tracker("https://tracking.example.com");
+var tracker = new BeaconAgent("https://tracking.example.com");
 tracker.track(eventType: "event", eventCategory: "ad", eventAction: "click", 
   eventData: {adID: "233925", adPosition: "top-left"}
 );
@@ -40,19 +40,13 @@ eventAction: ea
 eventData: ed
 ```
 
-It"s possible to override these by specifying a new object:
+Any unknown param will be transferred "as-is", i.e. "unmodified.
 
-```js
-Tracker.queryParams = {
-  eventType: "___et___",
-  ...
-}
-```
 ### Licence
 
 This code is [MIT][mit] licenced:
 
-Copyright (c) 2018 Valentin Vasilyev
+Copyright (c) 2018-2019 Valentin Vasilyev
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
