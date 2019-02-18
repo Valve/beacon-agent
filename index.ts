@@ -1,15 +1,18 @@
+interface Indexable {
+  [k: string]: Indexable | string | number | boolean
+}
+enum ShortParams {
+  visitorId = "vid",
+  eventType = "et",
+  eventCategory = "ec",
+  eventAction = "ea",
+  referrer = "r"
+}
+
 export class Tracker {
   private readonly VISITOR_KEY = "vid"
   public readonly endpointUrl: string
   public readonly timeout: number
-  public readonly queryParams = {
-    visitorId: "vid",
-    eventType: "et",
-    eventCategory: "ec",
-    eventAction: "ea",
-    referrer: "r",
-    url: "url"
-  }
 
   constructor(endpointUrl: string, timeout = 5000) {
     if (!endpointUrl) {
@@ -30,12 +33,12 @@ export class Tracker {
       if (this.isBeaconSupported()) {
         try {
           let sent = this.sendWithBeacon(event)
-          if(sent) {
+          if (sent) {
             clearTimeoutAndResolve()
           } else {
             reject("send failed")
           }
-        } catch(e) {
+        } catch (e) {
           reject(`send failed: ${e}`)
         }
       } else {
@@ -73,28 +76,28 @@ export class Tracker {
 
   private buildPayload(event: {}): {} {
     const payload = this.acronymizeObject(event)
-    payload[this.queryParams.visitorId] = this.getVisitorId() 
+    payload[ShortParams.visitorId] = this.getVisitorId()
     // adding additional values
-    if(document.referrer !== "") {
-      payload[this.queryParams.referrer] = document.referrer
+    if (document.referrer != "") {
+      payload[ShortParams.referrer] = document.referrer
     }
-    payload[this.queryParams.url] = location.href
+    payload["url"] = location.href
     return payload
   }
 
-  private acronymizeObject(obj: {}): {} {
-    const newObj = {};
+  private acronymizeObject(obj: Indexable): Indexable {
+    const newObj: Indexable = {}
     Object.keys(obj).forEach(key => {
-      newObj[this.maybeShortenKey(key)] = obj[key];
+      newObj[this.maybeShortenKey(key)] = obj[key]
     })
     return newObj
   }
 
   private valueToQueryString(value: any): string {
-    let encodeShortenedKey = (key) => encodeURIComponent(this.maybeShortenKey(key))
-    let createKeyValuePair = (key) => `${encodeShortenedKey(key)}=${this.valueToQueryString(value[key])}`
+    let encodeShortenedKey = (key: any) => encodeURIComponent(this.maybeShortenKey(key))
+    let createKeyValuePair = (key: any) => `${encodeShortenedKey(key)}=${this.valueToQueryString(value[key])}`
 
-    if (typeof value === "object") {
+    if (typeof value == "object") {
       return Object.keys(value).map(key => createKeyValuePair(key)).join("&")
     } else {
       return encodeURIComponent(value)
@@ -102,12 +105,17 @@ export class Tracker {
   }
 
   private maybeShortenKey(key: string): string {
-    return this.queryParams[key] || key;
+    if ("visitorId" == key) return ShortParams.visitorId
+    else if ("eventType" == key) return ShortParams.eventType
+    else if ("eventCategory" == key) return ShortParams.eventCategory
+    else if ("eventAction" == key) return ShortParams.eventAction
+    else if ("referrer" == key) return ShortParams.referrer
+    else return key
   }
 
   private getVisitorId(): string {
     let visitorId = localStorage.getItem(this.VISITOR_KEY)
-    if(!visitorId) {
+    if (!visitorId) {
       visitorId = this.randomString(8)
       localStorage.setItem(this.VISITOR_KEY, visitorId)
     }
@@ -117,7 +125,7 @@ export class Tracker {
   private randomString(length: number): string {
     const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ0123456789"
     let out = ""
-    for(let i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
       out += chars.charAt(Math.floor(Math.random() * chars.length))
     }
     return out

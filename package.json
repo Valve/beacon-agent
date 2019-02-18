@@ -1,18 +1,22 @@
 {
-  "name": "event-tracker",
-  "version": "0.1.0",
-  "description": "Simple library that allows you to send events to your server. Useful to send analytics and diagnostics events.",
-  "main": "index.js",
+  "name": "beacon-agent",
+  "version": "0.0.2",
+  "description": "Allows you to send events to your server. Useful to send analytics and diagnostics events.",
+  "keywords": ["events", "tracking", "analytics", "telemetry", "diagnostics", "beacon", "pixel"],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["README.md", "dist/"],
   "repository": "git@github.com:Valve/event-tracker.git",
   "author": "Valentin Vasilyev <valentin.vasilyev@outlook.com>",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "test": "karma start --single-run --browsers ChromeHeadless karma.conf.js"
+    "test": "karma start --single-run --browsers ChromeHeadless karma.conf.js",
+    "prepare": "tsc"
   },
   "devDependencies": {
-    "karma": "^4.0.0",
-    "karma-chrome-launcher": "^2.2.0",
-    "karma-jasmine": "^2.0.1"
+    "karma": "latest",
+    "karma-chrome-launcher": "latest",
+    "karma-jasmine": "latest"
   }
 }
