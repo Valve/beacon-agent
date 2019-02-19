@@ -9,7 +9,7 @@ enum ShortParams {
   referrer = "r"
 }
 
-class BeaconAgent {
+export class BeaconAgent {
   private readonly VISITOR_KEY = "vid"
   public readonly endpointUrl: string
   public readonly timeout: number
